@@ -1,3 +1,4 @@
+# pypy3
 import sys
 
 def possibleFinder(y,x):
