@@ -1,48 +1,30 @@
 import sys, collections
 
+'''
+양방향 탐색은 역방향 간선의 수가 많은 경우 사용하지 말자.
+IDS는 메모리는 적게 써도 시간초과가 발생한다.
+'''
+
 def bfs():
-    global s,d, distance, dist
+    global s,d,distance
+
     q = collections.deque()
     q.append(s)
-    q.append(d)
-    distance[s] = 1
-    distance[d] = -1
-    mx, mn = 2*d-s+1, 0
+    distance[s] = 0
+    
     while len(q):
         itm = q.popleft()
-        adder = distance[itm]<0 and distance[itm]-1 or distance[itm]+1
-        if adder >0:
-            x=[itm,1,-1]
-            
-        else:
-            if itm%2==0 and itm != 0:
-                q.append(itm//2)
-                if distance[itm//2] == 0:
-                    distance[itm//2] = adder
-                elif distance[itm//2]*distance[itm] <0:
-                    dist = abs(distance[itm//2]) + abs(distance[itm])
-                    return
-            x=[-1,1]
-            
-        for i in x:
-            if mn<=itm+i<mx:
-                q.append(itm+i)
-                if distance[itm+i] == 0:
-                    distance[itm+i] = adder
-                elif distance[itm+i] * distance[itm] <0:
-                    dist = abs(distance[itm+i]) + abs(distance[itm])
-                    return 
-                
-global s,d, distance, dist
+        if itm+1<100001 and distance[itm+1] == -1:
+            q.append(itm+1)
+            distance[itm+1] = distance[itm]+1
+        if itm-1>=0 and distance[itm-1] == -1:
+            q.append(itm-1)
+            distance[itm-1] = distance[itm]+1
+        if itm*2 <100001 and distance[itm*2] == -1:
+            q.append(itm*2)
+            distance[itm*2] = distance[itm]+1
+        
 s,d = map(int,sys.stdin.readline().strip().split())
-mx = d-s+1
-dist = 0
-distance = list(0 for i in range(0,mx+d))
-if s == d:
-    print(0)
-else:
-    if s > d:
-        print(s-d)
-    else:
-        bfs()
-        print(dist-1)
+distance = list(-1 for i in range(100001))
+bfs()
+print(distance[d])
