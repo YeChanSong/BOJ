@@ -1,78 +1,67 @@
 import java.io.*;
 import java.util.*;
 
-public class Main{
-    static BufferedReader br;
-    static BufferedWriter bw;
-    static int N,E,v1,v2;
-    static ArrayList<Node>[] adj;
-    static int[] dist;
-    
-    static class Node implements Comparable<Node>{
-        int cost,pos;
-        public Node(int p,int c){
-            this.pos =p;
-            this.cost =c;
-        }
-        @Override
-        public int compareTo(Node tgt){
-            return cost-tgt.cost;
-        }
-    }
-
+public class Main {
+    static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    static int N,E, V1, V2, AtoV1, AtoV2, BtoV1, BtoV2, VtoV;
+    static ArrayList<ArrayList<int[]>> adj = new ArrayList<>();
     public static void main(String[] args) throws IOException{
-        br = new BufferedReader(new InputStreamReader(System.in));
-        bw = new BufferedWriter(new OutputStreamWriter(System.out));
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        N = Integer.parseInt(st.nextToken());
-        E = Integer.parseInt(st.nextToken());
-        adj = new ArrayList[N];
-        int s,d,c;
+        int[] tmp = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        N = tmp[0]; E =tmp[1];
         for(int i=0;i<N;i++)
-            adj[i]=new ArrayList<Node>();
+            adj.add(new ArrayList<>());
         for(int i=0;i<E;i++){
-            st = new StringTokenizer(br.readLine());
-            s=Integer.parseInt(st.nextToken())-1;
-            d=Integer.parseInt(st.nextToken())-1;
-            c=Integer.parseInt(st.nextToken());
-            adj[s].add(new Node(d,c));
-            adj[d].add(new Node(s,c));
+            tmp = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+            adj.get(tmp[0]-1).add(new int[]{tmp[1]-1,tmp[2]});
+            adj.get(tmp[1]-1).add(new int[]{tmp[0]-1,tmp[2]});
         }
-
-        st = new StringTokenizer(br.readLine());
-        v1 = Integer.parseInt(st.nextToken())-1;
-        v2 = Integer.parseInt(st.nextToken())-1;
-        dijkstra(v1);
-        int AtoEnd,Ato1,vtov,res;
-        AtoEnd=dist[N-1];Ato1=dist[0];vtov=dist[v2];
-        dijkstra(v2);
-        int BtoEnd,Bto1;
-        BtoEnd=dist[N-1];Bto1=dist[0];
-        res = Math.min(AtoEnd+vtov+Bto1,BtoEnd+vtov+Ato1);
-        if(res>=1000000)
-            bw.write(Integer.toString(-1)+"\n");
-        else
-            bw.write(Integer.toString(res)+"\n");
-        bw.flush();bw.close();br.close();
+        tmp = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+        V1= tmp[0]-1; V2= tmp[1]-1;
+        dijkstra();
+        long sum1 = (long)AtoV1+(long)VtoV+(long)BtoV2;
+        long sum2 = (long)AtoV2+(long)VtoV+(long)BtoV1;
+        if(sum1>=Integer.MAX_VALUE && sum2>=Integer.MAX_VALUE){
+            System.out.println(-1);
+        }else{
+            if(sum1<sum2)
+                System.out.println(sum1);
+            else
+                System.out.println(sum2);
+        }
     }
-
-    static void dijkstra(int start){
-        PriorityQueue<Node> pq = new PriorityQueue<Node>();
-        dist = new int[N];
+    static void dijkstra(){
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b)->Integer.compare(a[0],b[0]));
+        int[] dist = new int[N];
         Arrays.fill(dist,Integer.MAX_VALUE);
-        dist[start] = 0;
-        pq.offer(new Node(start,0));
-        Node tmp;
+        pq.offer(new int[]{0,V1});
+        dist[V1] = 0;
+        int[] itm;
         while(!pq.isEmpty()){
-            tmp = pq.poll();
-            if(dist[tmp.pos]<tmp.cost)
+            itm= pq.poll();
+            if(dist[itm[1]]<itm[0])
                 continue;
-            for(Node nxt: adj[tmp.pos]){
-                if(dist[nxt.pos]>nxt.cost+tmp.cost){
-                    dist[nxt.pos]=nxt.cost+tmp.cost;
-                    pq.offer(new Node(nxt.pos,dist[nxt.pos]));
+            for(int[] nxt: adj.get(itm[1])){
+                if(dist[nxt[0]]>nxt[1]+itm[0]){
+                    dist[nxt[0]] = nxt[1]+itm[0];
+                    pq.offer(new int[]{dist[nxt[0]],nxt[0]});
                 }
             }
         }
+        AtoV1 = dist[0]; BtoV1 = dist[N-1]; VtoV = dist[V2];
+        Arrays.fill(dist,Integer.MAX_VALUE);
+        pq.offer(new int[]{0,V2});
+        dist[V2]=0;
+        while(!pq.isEmpty()){
+            itm= pq.poll();
+            if(dist[itm[1]]<itm[0])
+                continue;
+            for(int[] nxt: adj.get(itm[1])){
+                if(dist[nxt[0]]>nxt[1]+itm[0]){
+                    dist[nxt[0]] = nxt[1]+itm[0];
+                    pq.offer(new int[]{dist[nxt[0]],nxt[0]});
+                }
+            }
+        }
+        AtoV2 = dist[0]; BtoV2 = dist[N-1];
     }
 }
